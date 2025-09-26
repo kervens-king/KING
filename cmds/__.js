@@ -1,8 +1,8 @@
 /*   
  * Copyright © 2025 Mirage  
- * This file is part of Kord (modified for KING) and is licensed under the GNU GPLv3.  
- * You may not use this file except in compliance with the License.  
- * See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html  
+ * Ce fichier fait partie de Kord (modifié pour KING) et est sous licence GNU GPLv3.  
+ * Vous ne pouvez utiliser ce fichier que conformément à la Licence.  
+ * Voir le fichier LICENSE ou https://www.gnu.org/licenses/gpl-3.0.html  
  * -------------------------------------------------------------------------------  
  */
 
@@ -34,7 +34,7 @@ const getRandomFont = () => {
 
 kord({
   cmd: "menu|help",
-  desc: "list of commands",
+  desc: "Liste des commandes",
   react: "👑",
   fromMe: wtype,
   type: "help",
@@ -44,7 +44,7 @@ kord({
     commands.forEach(({ cmd, type }) => {
       if (!cmd) return
       const main = cmd.split("|")[0].trim()
-      const cat = type || "other"
+      const cat = type || "autres"
       if (!types[cat]) types[cat] = []
       types[cat].push(main)
     })
@@ -67,9 +67,9 @@ kord({
 
       const final = `\`\`\`
 ╔══✦═━─⌬『 👑 KING 👑 』⌬─━═✦══╗
-   🔥 CATEGORY: ${actualType.toUpperCase()}
-   📜 COMMANDS: ${types[actualType].length}
-   👑 PREFIX: ${prefix}
+   🔥 CATÉGORIE : ${actualType.toUpperCase()}
+   📜 COMMANDES : ${types[actualType].length}
+   👑 PRÉFIXE : ${prefix}
 ╚══✦═━─⌬✦⌬─━═✦══╝\`\`\`
 
 ${readmore}
@@ -79,7 +79,7 @@ ${readmore}
 ${formattedCmds}
 ┕ ─┉─ • ─┉─ ┙
 
-✨ Tip: Use ${prefix}menu to see all categories`
+✨ Astuce : Utilisez ${prefix}menu pour voir toutes les catégories`
 
       return m.send("https://files.catbox.moe/mmg841.jpg", { caption: final }, "image")
     }
@@ -90,13 +90,13 @@ ${formattedCmds}
 
     let menu = `\`\`\`
 ╔══✦═━─⌬『 👑 KING BOT 👑 』⌬─━═✦══╗
-   👑 Owner: ${config().OWNER_NAME}
-   🙋 User: ${m.pushName}
-   🔌 Plugins: ${commands.length}
-   ⏳ Uptime: ${uptime}
-   💾 Memory: ${memoryUsage}
-   🛠 Version: v${version}
-   📱 Platform: ${m.client.platform()}
+   👑 Propriétaire : ${config().OWNER_NAME}
+   🙋 Utilisateur : ${m.pushName}
+   🔌 Plugins : ${commands.length}
+   ⏳ Uptime : ${uptime}
+   💾 Mémoire : ${memoryUsage}
+   🛠 Version : v${version}
+   📱 Plateforme : ${m.client.platform()}
 ╚══✦═━─⌬✦⌬─━═✦══╝\`\`\`
 
 ${readmore}
@@ -118,13 +118,13 @@ ${formattedCmds}
     const resolvedCategoryList = await Promise.all(categoryList)
     menu += resolvedCategoryList.join('\n\n')
 
-    menu += `\n\n✨ Tip: Use ${prefix}menu [category] for specific commands`
+    menu += `\n\n✨ Astuce : Utilisez ${prefix}menu [catégorie] pour les commandes spécifiques`
 
     const final = menu.trim()
 
     return m.send("https://files.catbox.moe/mmg841.jpg", { caption: final }, "image")
   } catch (e) {
-    console.log("cmd error", e)
+    console.log("Erreur commande menu:", e)
     return await m.sendErr(e)
   }
 })
