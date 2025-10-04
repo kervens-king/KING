@@ -7,12 +7,12 @@
  * -------------------------------------------------------------------------------
  */
 
-const { kord, extractUrlsFromString, fetchWaifu, getJson, prefix, wtype, ss } = require("../core")
+const { king, extractUrlsFromString, fetchWaifu, getJson, prefix, wtype, ss } = require("../core")
 const fs = require("fs");
 const path = require("path");
 const fetch = require("node-fetch")
 
-kord({
+king({
     cmd: "anime",
     desc: "search for anime info from MyAnimeList",
     fromMe: wtype,
@@ -43,7 +43,7 @@ kord({
     }
 })
 
-kord({
+king({
     cmd: "waifu|animegirl",
     desc: "send random anime girl image",
     fromMe: wtype,
@@ -65,7 +65,7 @@ kord({
     }
 })
 
-kord({
+king({
     cmd: "manga",
     desc: "search for manga information from MyAnimeList",
     fromMe: wtype,
@@ -98,9 +98,9 @@ kord({
     }
 })
 
-kord({
+king({
     cmd: "animequote",
-    desc: "get random anime quote",
+    desc: "obtenir une citation d'anime aléatoire",
     type: "anime",
     fromMe: wtype,
     react: "💭"
@@ -120,9 +120,9 @@ kord({
     }
 })
 
-kord({
+king({
     cmd: "animenews",
-    desc: "latest anime news from MyAnimeList",
+    desc: "dernières nouvelles d'anime de MyAnimeList",
     fromMe: wtype,
     type: "anime",
     react: "📰"
@@ -147,7 +147,7 @@ kord({
     }
 })
 
-kord({
+King({
     cmd: "character|animechar",
     desc: "search for anime character info",
     fromMe: wtype,
