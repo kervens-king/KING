@@ -1,130 +1,123 @@
 /*   
- * Copyright © 2025 Mirage  
- * Ce fichier fait partie de Kord (modifié pour KING) et est sous licence GNU GPLv3.  
- * Vous ne pouvez utiliser ce fichier que conformément à la Licence.  
- * Voir le fichier LICENSE ou https://www.gnu.org/licenses/gpl-3.0.html  
- * -------------------------------------------------------------------------------  
+ * 👑 KING BOT ROYAL EDITION
+ * Par Kervens | 2025
+ * Sous licence GNU GPLv3
+ * ------------------------------------------------------------
  */
 
-const os = require("os")
-const { changeFont } = require("../core")
-const { kord, wtype, secondsToHms, config, commands } = require("../core")
-const { version } = require("../package.json")
+const os = require("os");
+const moment = require("moment-timezone");
+const { changeFont } = require("../core");
+const { king, wtype, secondsToHms, config, commands } = require("../core");
+const { version } = require("../package.json");
 
-// 🔹 Préfixe fixé à "."
-const prefix = "."
+const prefix = ".";
 
+// 🔹 Fonction format mémoire
 const format = (bytes) => {
-  const sizes = ["B", "KB", "MB", "GB"]
-  if (bytes === 0) return "0 B"
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  return parseFloat((bytes / Math.pow(1024, i)).toFixed(1)) + " " + sizes[i]
-}
+  const sizes = ["B", "KB", "MB", "GB"];
+  if (bytes === 0) return "0 B";
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return parseFloat((bytes / Math.pow(1024, i)).toFixed(1)) + " " + sizes[i];
+};
 
-function clockString(ms) {
-  let h = isNaN(ms) ? "--" : Math.floor(ms / 3600000)
-  let m = isNaN(ms) ? "--" : Math.floor(ms % 3600000 / 60000)
-  let s = isNaN(ms) ? "--" : Math.floor(ms % 60000 / 1000)
-  return [h, m, s].map(v => v.toString().padStart(2, 0)).join(":")
-}
+// 🔹 Police stylée aléatoire
+const getRandomFont = () => "sansItalic";
 
-const getRandomFont = () => {
-  return "sansItalic"
-}
+// 🔹 Images royales aléatoires
+const royalImages = [
+  "https://files.catbox.moe/nf3k3r.jpg",
+  "https://files.catbox.moe/y10w7b.jpg",
+  "https://files.catbox.moe/x6w6fp.jpg",
+  "https://files.catbox.moe/6xptam.jpg",
+  "https://files.catbox.moe/5vhq8a.jpg",
+  "https://files.catbox.moe/mmg841.jpg"
+];
 
-kord({
+// 🔹 Commande principale : .menu / .help
+king({
   cmd: "menu|help",
-  desc: "Liste des commandes",
+  desc: "Affiche le menu royal animé du KING BOT 👑",
   react: "👑",
   fromMe: wtype,
   type: "help",
 }, async (m) => {
   try {
-    const types = {}
+    // 💫 Étape 1 : Message d’intro royal
+    await m.send("👑 *Chargement du Trône Royal...*");
+    await new Promise((r) => setTimeout(r, 1200));
+    await m.send("🏰 *Préparation du menu majestueux...*");
+    await new Promise((r) => setTimeout(r, 1200));
+    await m.send("💫 *Entrée dans le Royaume KING...*");
+
+    // 💎 Étape 2 : Préparation du menu
+    const types = {};
     commands.forEach(({ cmd, type }) => {
-      if (!cmd) return
-      const main = cmd.split("|")[0].trim()
-      const cat = type || "autres"
-      if (!types[cat]) types[cat] = []
-      types[cat].push(main)
-    })
+      if (!cmd) return;
+      const main = cmd.split("|")[0].trim();
+      const cat = type || "Autres";
+      if (!types[cat]) types[cat] = [];
+      types[cat].push(main);
+    });
 
-    const requestedType = m.text ? m.text.toLowerCase().trim() : null
-    const availableTypes = Object.keys(types).map(t => t.toLowerCase())
+    const readmore = String.fromCharCode(8206).repeat(4001);
+    const uptime = await secondsToHms(process.uptime());
+    const memoryUsage = format(os.totalmem() - os.freemem());
+    const totalRam = format(os.totalmem());
+    const cpu = os.cpus()[0].model.split(" @ ")[0];
+    const platform = `${m.client.platform()} ${os.type()}`;
+    const date = moment().tz("Africa/Port-au-Prince").format("DD/MM/YYYY");
+    const time = moment().tz("Africa/Port-au-Prince").format("HH:mm");
+    const day = moment().tz("Africa/Port-au-Prince").format("dddd");
+    const moods = ["🌅", "🌇", "🌙", "⚡", "🔥", "🌈", "💫", "🌀"];
+    const mood = moods[Math.floor(Math.random() * moods.length)];
+    const randomImage = royalImages[Math.floor(Math.random() * royalImages.length)];
 
-    const more = String.fromCharCode(8206)
-    const readmore = more.repeat(4001)
-
-    // MENU PAR CATÉGORIE
-    if (requestedType && availableTypes.includes(requestedType)) {
-      const actualType = Object.keys(types).find(t => t.toLowerCase() === requestedType)
-
-      const at = await changeFont(actualType.toUpperCase(), "monospace")
-      const cmdList = types[actualType].map(cmd =>
-        `│ 👑 ${prefix}${cmd.replace(/[^a-zA-Z0-9-+]/g, "")}`
-      ).join('\n')
-      const formattedCmds = await changeFont(cmdList, getRandomFont())
-
-      const final = `\`\`\`
-╔══✦═━─⌬『 👑 KING 👑 』⌬─━═✦══╗
-   🔥 CATÉGORIE : ${actualType.toUpperCase()}
-   📜 COMMANDES : ${types[actualType].length}
-   👑 PRÉFIXE : ${prefix}
-╚══✦═━─⌬✦⌬─━═✦══╝\`\`\`
-
+    let menu = `
+╭──❏ *⌜ 👑 𝐊𝐈𝐍𝐆 𝐁𝐎𝐓 ⌟* ❏──✦
+│
+│ 👑 *Propriétaire* : ${config().OWNER_NAME || "Inconnu"}
+│ 💬 *Utilisateur* : ${m.pushName || "Anonyme"}
+│ ⚙️ *Version* : v${version}
+│ 💻 *Plateforme* : ${platform}
+│ ⏰ *Heure* : ${time} 🇭🇹
+│ 📅 *Date* : ${day}, ${date}
+│ 🕒 *Uptime* : ${uptime}
+│ 💾 *RAM* : ${memoryUsage} / ${totalRam}
+│ ⚡ *CPU* : ${cpu}
+│ 🔮 *Préfixe* : ${prefix}
+│ 🧠 *Commandes* : ${commands.length}
+│ 🚀 *Mode* : Public
+│ 🌈 *Mood* : ${mood}
+│
+╰───────────────────────────────✦
 ${readmore}
+`;
 
-   ┏ ${at} ┓
-┍ ─┉─ • ─┉─ ┑
-${formattedCmds}
-┕ ─┉─ • ─┉─ ┙
-
-✨ Astuce : Utilisez ${prefix}menu pour voir toutes les catégories`
-
-      return m.send("https://files.catbox.moe/mmg841.jpg", { caption: final }, "image")
-    }
-
-    // MENU GLOBAL
-    const uptime = await secondsToHms(process.uptime())
-    const memoryUsage = format(os.totalmem() - os.freemem())
-
-    let menu = `\`\`\`
-╔══✦═━─⌬『 👑 KING BOT 👑 』⌬─━═✦══╗
-   👑 Propriétaire : ${config().OWNER_NAME}
-   🙋 Utilisateur : ${m.pushName}
-   🔌 Plugins : ${commands.length}
-   ⏳ Uptime : ${uptime}
-   💾 Mémoire : ${memoryUsage}
-   🛠 Version : v${version}
-   📱 Plateforme : ${m.client.platform()}
-╚══✦═━─⌬✦⌬─━═✦══╝\`\`\`
-
-${readmore}
-`
-
+    // 🔸 Liste des commandes par catégorie
     const categoryList = Object.keys(types).map(async (type) => {
+      const tty = await changeFont(type.toUpperCase(), "monospace");
       const cmdList = types[type].map(cmd =>
-        `│ 👑 ${prefix}${cmd.replace(/[^a-zA-Z0-9-+]/g, "")}`
-      ).join('\n')
-      const formattedCmds = await changeFont(cmdList, getRandomFont())
-      const tty = await changeFont(type.toUpperCase(), "monospace")
+        `│ 💎 ${prefix}${cmd.replace(/[^a-zA-Z0-9-+]/g, "")}`
+      ).join("\n");
+      const formattedCmds = await changeFont(cmdList, getRandomFont());
 
-      return ` ┏ ${tty} ┓
-┍ ─┉─ • ─┉─ ┑
+      return `
+╭──❏ *${tty}* ❏──✦
 ${formattedCmds}
-┕ ─┉─ • ─┉─ ┙`
-    })
+╰──────────────────────✦`;
+    });
 
-    const resolvedCategoryList = await Promise.all(categoryList)
-    menu += resolvedCategoryList.join('\n\n')
+    const resolvedCategoryList = await Promise.all(categoryList);
+    menu += resolvedCategoryList.join("\n\n");
+    menu += `\n\n✨ *Astuce :* Tape ${prefix}menu [catégorie] pour voir les commandes spécifiques.\n👑 *Développé avec honneur par KING TEAM*`;
 
-    menu += `\n\n✨ Astuce : Utilisez ${prefix}menu [catégorie] pour les commandes spécifiques`
+    // 💫 Étape 3 : Envoi final avec image royale
+    await new Promise((r) => setTimeout(r, 1500));
+    await m.send(randomImage, { caption: menu.trim() }, "image");
 
-    const final = menu.trim()
-
-    return m.send("https://files.catbox.moe/mmg841.jpg", { caption: final }, "image")
   } catch (e) {
-    console.log("Erreur commande menu:", e)
-    return await m.sendErr(e)
+    console.error("Erreur menu:", e);
+    await m.sendErr(e);
   }
-})
+});
