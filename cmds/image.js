@@ -1,14 +1,14 @@
 /* 
  * Copyright © 2025 Mirage
- * This file is part of Kord and is licensed under the GNU GPLv3.
- * And I hope you know what you're doing here.
- * You may not use this file except in compliance with the License.
- * See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html
+ * Ce fichier fait partie de Kord et est sous licence GNU GPLv3.
+ * Et j'espère que vous savez ce que vous faites ici.
+ * Vous ne pouvez pas utiliser ce fichier sauf en conformité avec la Licence.
+ * Voir le fichier LICENSE ou https://www.gnu.org/licenses/gpl-3.0.html
  * -------------------------------------------------------------------------------
  */
 
 const {
-   kord,
+   King,
    wtype,
    prefix,
    remini,
@@ -24,278 +24,285 @@ const getImageUrl = async (m) => {
     } else if (m.quoted.sender) {
         return await m.client.profilePictureUrl(m.quoted.sender, 'image')
     }
-    throw new Error("No valid image source found")
+    throw new Error("Aucune source d'image valide trouvée")
 }
 
+// Fonction utilitaire pour formater la taille des fichiers
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
 
-
-kord({
+King({
         cmd: "remini|upscale|hd",
-        desc: "increase the quality of an image(pixelcut)",
+        desc: "améliorer la qualité d'une image (pixelcut)",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
       try {
-        if (!(m.image || m.quoted.image)) return await m.send("_Reply to a image_")
+        if (!(m.image || m.quoted.image)) return await m.send("_Répondez à une image_")
         await m.react("⏳")
         var mss = m.image ? m : m.quoted.image ? m.quoted : null
         var media = await m.client.downloadMediaMessage(m.image ? m : m.quoted.image ? m.quoted: null)
         var pic = await upscaleImage(media, mss.mtype)
-        await m.react("")
-        return await m.send(pic, { caption: "> here's your upscaled image.." }, "image")
+        await m.react("✅")
+        return await m.send(pic, { caption: "> Voici votre image améliorée.." }, "image")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 })
 
 
-kord({
+King({
         cmd: "gfx|gfx1",
-        desc: "create gfx image",
+        desc: "créer une image GFX",
         fromMe: wtype,
         type: "image"
 }, async (m, text, c) => {
         try {
-        if (!text) return await m.send(`_*provide two texts*_\n_example: ${prefix}gfx I Am;Kord_`)
+        if (!text) return await m.send(`_*Fournissez deux textes*_\n_exemple: ${prefix}gfx Je Suis;King_`)
         var txt = text.split(";")
-        if (!txt[0] || !txt[1]) return await m.send(`_*provide two texts*_\n_example: ${c} I Am;Kord_`)
+        if (!txt[0] || !txt[1]) return await m.send(`_*Fournissez deux textes*_\n_exemple: ${c} Je Suis;King_`)
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx?apikey=free_key@maher_apis&text1=${txt[1]}&text2=${txt[0]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
-kord({
+King({
         cmd: "gfx2",
-        desc: "create gfx2 image",
+        desc: "créer une image GFX2",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide two texts*_\n_example: ${prefix}gfx2 I Am;Kord_`)
+        if (!text) return await m.send(`_*Fournissez deux textes*_\n_exemple: ${prefix}gfx2 Je Suis;King_`)
         var txt = text.split(";")
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx2?apikey=free_key@maher_apis&text1=${txt[1]}&text2=${txt[0]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx3",
-        desc: "create gfx3 image",
+        desc: "créer une image GFX3",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide two texts*_\n_example: ${prefix}gfx3 I Am;Kord_`)
+        if (!text) return await m.send(`_*Fournissez deux textes*_\n_exemple: ${prefix}gfx3 Je Suis;King_`)
         var txt = text.split(";")
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx3?apikey=free_key@maher_apis&text1=${txt[1]}&text2=${txt[0]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx4",
-        desc: "create gfx4 image",
+        desc: "créer une image GFX4",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide two texts*_\n_example: ${prefix}gfx4 I Am;Kord_`)
+        if (!text) return await m.send(`_*Fournissez deux textes*_\n_exemple: ${prefix}gfx4 Je Suis;King_`)
         var txt = text.split(";")
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx4?apikey=free_key@maher_apis&text1=${txt[1]}&text2=${txt[0]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx5",
-        desc: "create gfx5 image with three texts",
+        desc: "créer une image GFX5 avec trois textes",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide three texts*_\n_example: ${prefix}gfx5 I Am;Kord;Dev_`)
+        if (!text) return await m.send(`_*Fournissez trois textes*_\n_exemple: ${prefix}gfx5 Je Suis;King;Dev_`)
         var txt = text.split(";")
-        if (txt.length < 3) return await m.send(`_*provide all three texts separated by semicolons*_\n_example: ${prefix}gfx5 I Am;Kord;Dev_`)
+        if (txt.length < 3) return await m.send(`_*Fournissez les trois textes séparés par des points-virgules*_\n_exemple: ${prefix}gfx5 Je Suis;King;Dev_`)
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx5?apikey=free_key@maher_apis&text1=${txt[0]}&text2=${txt[1]}&text3=${txt[2]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx6",
-        desc: "create gfx6 image with three texts",
+        desc: "créer une image GFX6 avec trois textes",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide three texts*_\n_example: ${prefix}gfx6 I Am;Kord;Dev_`)
+        if (!text) return await m.send(`_*Fournissez trois textes*_\n_exemple: ${prefix}gfx6 Je Suis;King;Dev_`)
         var txt = text.split(";")
-        if (txt.length < 3) return await m.send(`_*provide all three texts separated by semicolons*_\n_example: ${prefix}gfx6 I Am;Kord;Dev_`)
+        if (txt.length < 3) return await m.send(`_*Fournissez les trois textes séparés par des points-virgules*_\n_exemple: ${prefix}gfx6 Je Suis;King;Dev_`)
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx6?apikey=free_key@maher_apis&text1=${txt[0]}&text2=${txt[1]}&text3=${txt[2]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx7",
-        desc: "create gfx7 image",
+        desc: "créer une image GFX7",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide two texts*_\n_example: ${prefix}gfx7 I Am;Kord_`)
+        if (!text) return await m.send(`_*Fournissez deux textes*_\n_exemple: ${prefix}gfx7 Je Suis;King_`)
         var txt = text.split(";")
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx7?apikey=free_key@maher_apis&text1=${txt[1]}&text2=${txt[0]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx8",
-        desc: "create gfx8 image",
+        desc: "créer une image GFX8",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide two texts*_\n_example: ${prefix}gfx8 I Am;Kord_`)
+        if (!text) return await m.send(`_*Fournissez deux textes*_\n_exemple: ${prefix}gfx8 Je Suis;King_`)
         var txt = text.split(";")
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx8?apikey=free_key@maher_apis&text1=${txt[1]}&text2=${txt[0]}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx9",
-        desc: "create gfx9 image with single text",
+        desc: "créer une image GFX9 avec un seul texte",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide text*_\n_example: ${prefix}gfx9 Kord_`)
+        if (!text) return await m.send(`_*Fournissez un texte*_\n_exemple: ${prefix}gfx9 King_`)
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx9?apikey=free_key@maher_apis&text=${encodeURIComponent(text)}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx10",
-        desc: "create gfx10 image with single text",
+        desc: "créer une image GFX10 avec un seul texte",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide text*_\n_example: ${prefix}gfx10 Kord_`)
+        if (!text) return await m.send(`_*Fournissez un texte*_\n_exemple: ${prefix}gfx10 King_`)
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx10?apikey=free_key@maher_apis&text=${encodeURIComponent(text)}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
-kord({
+King({
         cmd: "gfx11",
-        desc: "create gfx11 image with single text",
+        desc: "créer une image GFX11 avec un seul texte",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide text*_\n_example: ${prefix}gfx11 Kord_`)
+        if (!text) return await m.send(`_*Fournissez un texte*_\n_exemple: ${prefix}gfx11 King_`)
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx11?apikey=free_key@maher_apis&text=${encodeURIComponent(text)}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
 
-kord({
+King({
         cmd: "gfx12",
-        desc: "create gfx12 image with single text",
+        desc: "créer une image GFX12 avec un seul texte",
         fromMe: wtype,
         type: "image"
 }, async (m, text) => {
         try {
-        if (!text) return await m.send(`_*provide text*_\n_example: ${prefix}gfx12 Kord_`)
+        if (!text) return await m.send(`_*Fournissez un texte*_\n_exemple: ${prefix}gfx12 King_`)
         await m.react("⏳")
          await m.send(`https://api.nexoracle.com/image-creating/gfx12?apikey=free_key@maher_apis&text=${encodeURIComponent(text)}`, {caption: config().CAPTION}, "image")
-         await m.react("")
+         await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
-kord({
+King({
         cmd: "carbon",
-        desc: "create carbon image from code",
+        desc: "créer une image carbon à partir de code",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
         const codeText = m.quoted?.text || text
         
-        if (!codeText) return await m.send(`_*provide code or reply to a message with code*_\n_example: ${prefix}carbon console.log("Hello World")_`)
+        if (!codeText) return await m.send(`_*Fournissez du code ou répondez à un message avec du code*_\n_exemple: ${prefix}carbon console.log("Hello World")_`)
         
         await m.react("⏳")
         await m.send(
@@ -303,22 +310,22 @@ kord({
                 {caption: config().CAPTION}, 
                 "image"
         )
-        await m.react("")
+        await m.react("✅")
         } catch (err) {
                 console.error(err)
-                return await m.send(`error ${err}`)
+                return await m.send(`Erreur: ${err}`)
         }
 }
 )
 
-kord({
+King({
         cmd: "wanted",
-        desc: "create mock wanted poster of replied user or pic",
+        desc: "créer un avis de recherche de l'utilisateur ou de l'image répondu",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -327,21 +334,21 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-kord({
+King({
         cmd: "wasted",
-        desc: "create GTA wasted effect on replied user or pic",
+        desc: "créer un effet GTA wasted sur l'utilisateur ou l'image répondu",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -350,21 +357,21 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-kord({
+King({
         cmd: "rainbow",
-        desc: "apply rainbow filter to replied user or pic",
+        desc: "appliquer un filtre arc-en-ciel à l'utilisateur ou à l'image répondu",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -373,21 +380,21 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-kord({
+King({
         cmd: "trigger-meme",
-        desc: "create triggered meme of replied user or pic",
+        desc: "créer un meme triggered de l'utilisateur ou de l'image répondu",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -396,21 +403,21 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-kord({
+King({
         cmd: "rip-meme",
-        desc: "create RIP meme of replied user or pic",
+        desc: "créer un meme RIP de l'utilisateur ou de l'image répondu",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -419,21 +426,21 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-kord({
+King({
         cmd: "mnm",
-        desc: "create M&M candy effect with replied user or pic",
+        desc: "créer un effet bonbon M&M avec l'utilisateur ou l'image répondu",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -442,21 +449,21 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-kord({
+King({
         cmd: "jail",
-        desc: "put replied user or pic behind bars",
+        desc: "mettre l'utilisateur ou l'image répondu derrière les barreaux",
         fromMe: wtype,
         type: "image-meme",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -465,21 +472,21 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-kord({
+King({
         cmd: "invert",
-        desc: "invert colors of replied user or pic",
+        desc: "inverser les couleurs de l'utilisateur ou de l'image répondu",
         fromMe: wtype,
         type: "image",
 }, async (m, text) => {
         try {
-            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Reply to a user or a photo*_")
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
             await m.react("⏳")
             
             const imgUrl = await getImageUrl(m)
@@ -488,17 +495,16 @@ kord({
                 {caption: config().CAPTION},
                 "image"
             )
-            await m.react("")
+            await m.react("✅")
         } catch (err) {
             console.error(err)
-            return await m.send(`Error: ${err}`)
+            return await m.send(`Erreur: ${err}`)
         }
 })
 
-
-kord({
+King({
   cmd: "naturewlp",
-  desc: "sends slides of nature wallpapers",
+  desc: "envoie des diapositives de fonds d'écran nature",
   fromMe: wtype,
   type: "image",
 }, async (m, text) => {
@@ -511,14 +517,14 @@ kord({
 
         const slides = wallpapers.map(wallpaper => {
             const stats = `❐ ${wallpaper.downloads} ✰ ${wallpaper.likes} ✡ ${wallpaper.views}`;
-            const details = `Resolution: ${wallpaper.resolution}\nSize: ${formatFileSize(wallpaper.size * 1024)}`;
+            const details = `Résolution: ${wallpaper.resolution}\nTaille: ${formatFileSize(wallpaper.size * 1024)}`;
             
             return [
                 wallpaper.thumbnail,
-                `${text} wallpapers`,
+                `${text} fonds d'écran`,
                 `${details}`,
                 wallpaper.tags,
-                'Download',
+                'Télécharger',
                 wallpaper.image,
                 'cta_url',
                 wallpaper.image
@@ -552,14 +558,14 @@ kord({
 
         const interactiveMessage = proto.Message.InteractiveMessage.fromObject({
             body: proto.Message.InteractiveMessage.Body.fromObject({
-                text: `*Explore ...*\n★★★`
+                text: `*Explorez ...*\n★★★`
             }),
             footer: proto.Message.InteractiveMessage.Footer.fromObject({
                 text: ''
             }),
             header: proto.Message.InteractiveMessage.Header.fromObject({
-                title: `*${text} Wallpapers*`,
-                subtitle: 'Swipe to enjoy!',
+                title: `*${text} Fonds d'écran*`,
+                subtitle: 'Glissez pour profiter!',
                 hasMediaAttachment: false
             }),
             carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({ cards })
@@ -573,7 +579,116 @@ kord({
 
         await m.client.relayMessage(jid, msg.message, { messageId: msg.key.id });
     } catch (error) {
-        console.error('Error fetching nature wlp:', error)
-        return await m.send(`[ERROR!] ${error}`)
+        console.error('Erreur lors de la récupération des fonds d\'écran nature:', error)
+        return await m.send(`[ERREUR!] ${error}`)
     }
 })
+
+// =============================================
+// COMMANDES D'IMAGE SUPPLÉMENTAIRES POUR KING 👑
+// =============================================
+
+King({
+        cmd: "blur",
+        desc: "appliquer un flou à l'image",
+        fromMe: wtype,
+        type: "image",
+}, async (m, text) => {
+        try {
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
+            await m.react("⏳")
+            
+            const imgUrl = await getImageUrl(m)
+            await m.send(
+                `https://api.nexoracle.com/image-processing/blur?apikey=free_key@maher_apis&img=${encodeURIComponent(imgUrl)}`,
+                {caption: config().CAPTION},
+                "image"
+            )
+            await m.react("✅")
+        } catch (err) {
+            console.error(err)
+            return await m.send(`Erreur: ${err}`)
+        }
+})
+
+King({
+        cmd: "pixelate",
+        desc: "pixelliser l'image",
+        fromMe: wtype,
+        type: "image",
+}, async (m, text) => {
+        try {
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
+            await m.react("⏳")
+            
+            const imgUrl = await getImageUrl(m)
+            await m.send(
+                `https://api.nexoracle.com/image-processing/pixelate?apikey=free_key@maher_apis&img=${encodeURIComponent(imgUrl)}`,
+                {caption: config().CAPTION},
+                "image"
+            )
+            await m.react("✅")
+        } catch (err) {
+            console.error(err)
+            return await m.send(`Erreur: ${err}`)
+        }
+})
+
+King({
+        cmd: "sepia",
+        desc: "appliquer un effet sépia à l'image",
+        fromMe: wtype,
+        type: "image",
+}, async (m, text) => {
+        try {
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
+            await m.react("⏳")
+            
+            const imgUrl = await getImageUrl(m)
+            await m.send(
+                `https://api.nexoracle.com/image-processing/sepia?apikey=free_key@maher_apis&img=${encodeURIComponent(imgUrl)}`,
+                {caption: config().CAPTION},
+                "image"
+            )
+            await m.react("✅")
+        } catch (err) {
+            console.error(err)
+            return await m.send(`Erreur: ${err}`)
+        }
+})
+
+King({
+        cmd: "grayscale",
+        desc: "convertir l'image en niveaux de gris",
+        fromMe: wtype,
+        type: "image",
+}, async (m, text) => {
+        try {
+            if (!m.quoted?.sender && !m.quoted?.image) return await m.send("_*Répondez à un utilisateur ou à une photo*_")
+            await m.react("⏳")
+            
+            const imgUrl = await getImageUrl(m)
+            await m.send(
+                `https://api.nexoracle.com/image-processing/grayscale?apikey=free_key@maher_apis&img=${encodeURIComponent(imgUrl)}`,
+                {caption: config().CAPTION},
+                "image"
+            )
+            await m.react("✅")
+        } catch (err) {
+            console.error(err)
+            return await m.send(`Erreur: ${err}`)
+        }
+})
+
+console.log(`
+╔═══════════════════════════════╗
+║        KING IMAGE SYSTEM      ║
+║         🎨 ACTIVATED 🎨       ║
+║                               ║
+║  🖼️  GFX Commands     🎭 Memes  ║
+║  🔧 Image Processing  🖌️ Filters ║
+║  💎 Upscale Quality   🎴 Wallpapers ║
+║                               ║
+║     👑 KING MODE: ON 👑      ║
+╚═══════════════════════════════╝
+`);
