@@ -1,718 +1,824 @@
 /* 
  * Copyright © 2025 Mirage
- * This file is part of Kord and is licensed under the GNU GPLv3.
- * And I hope you know what you're doing here.
- * You may not use this file except in compliance with the License.
- * See the LICENSE file or https://www.gnu.org/licenses/gpl-3.0.html
+ * Ce fichier fait partie de Kord et est sous licence GNU GPLv3.
+ * Et j'espère que vous savez ce que vous faites ici.
+ * Vous ne pouvez pas utiliser ce fichier sauf en conformité avec la Licence.
+ * Voir le fichier LICENSE ou https://www.gnu.org/licenses/gpl-3.0.html
  * -------------------------------------------------------------------------------
  */
 
-const { kord, wtype, updateConfig, prefix, updateEnv, updateEnvSudo, addEnvSudo, removeEnvSudo, replaceEnvSudo, getEnvValue, envExists, listEnvKeys, toBoolean, getPlatformInfo, setVar, updateVar, delVar, getVars, config, myMods, getAdmins 
+const { King, wtype, updateConfig, prefix, updateEnv, updateEnvSudo, addEnvSudo, removeEnvSudo, replaceEnvSudo, getEnvValue, envExists, listEnvKeys, toBoolean, getPlatformInfo, setVar, updateVar, delVar, getVars, config, myMods, getAdmins 
   } = require("../core")
-  const fs = require("fs")
-  
-  
-  
-kord({
+const fs = require("fs")
+
+// ==================== GESTION DES VARIABLES ====================
+
+King({
   cmd: "setvar",
-  desc: "set a config in config.env/config.js",
+  desc: "⚙️ Définir une variable de configuration",
   fromMe: true,
   type: "config",
-}, async (m, text)=> {
+  category: "administration"
+}, async (m, text) => {
   try {
-  if (!text)  return await m.send(`*provide the var name and value*\n_example: ${prefix}setvar SESSION_ID=kord-ai_321`)
-  var [key, ...args] = text.split("=")
-  key = key.toUpperCase()
-  var value = args.join("=").trim()
-  if (!key || !value) return await m.send(`*provide the var name and value*\n_example: ${prefix}setvar SESSION_ID kord-ai_321`) 
-  const platformInfo = getPlatformInfo()
-  if (platformInfo.platform === "render") {
-    try {
-      await m.send(`*_Config Successfully Set_* *${key.toUpperCase()}* _to_ *${value}*\n_Restarting..._`)
-      await setVar(key.toUpperCase(), value)
-    } catch (error) {
-      await m.send(`*Error setting variable:* ${error.message}`)
+    if (!text) {
+      return await m.send(`❌ *Paramètres manquants* \n_Format: ${prefix}setvar NOM_VAR=valeur_\n_Exemple: ${prefix}setvar SESSION_ID=kord-ai_321`)
     }
-  } else {
-    var isExist = await envExists()
-    if (isExist) {
-      if (!process.env[key]) {
-        await updateEnv(key, value)
-        return await m.send(`*Config set successfully!*\n\n_Created ${key} with value ${value}_`)
-      } else {
-        await updateEnv(key, value)
-        return await m.send(`*Config set successfully!*`)
+    
+    const [key, ...args] = text.split("=")
+    const nomVar = key.toUpperCase()
+    const valeur = args.join("=").trim()
+    
+    if (!nomVar || !valeur) {
+      return await m.send(`❌ *Paramètres incomplets* \n_Format: ${prefix}setvar NOM_VAR=valeur_`)
+    }
+    
+    const infoPlateforme = getPlatformInfo()
+    
+    if (infoPlateforme.platform === "render") {
+      try {
+        await m.send(`✅ *Variable définie!* \n_${nomVar} = ${valeur}_\n🔄 _Redémarrage en cours..._`)
+        await setVar(nomVar, valeur)
+      } catch (error) {
+        await m.send(`❌ *Erreur définition:* ${error.message}`)
       }
     } else {
-      await updateConfig(key, value)
-      return await m.send(`*Config set successfully!*`)
+      const existeEnv = await envExists()
+      if (existeEnv) {
+        if (!process.env[nomVar]) {
+          await updateEnv(nomVar, valeur)
+          return await m.send(`✅ *Variable créée!* \n_${nomVar} = ${valeur}_`)
+        } else {
+          await updateEnv(nomVar, valeur)
+          return await m.send(`✅ *Variable mise à jour!* \n_${nomVar} = ${valeur}_`)
+        }
+      } else {
+        await updateConfig(nomVar, valeur)
+        return await m.send(`✅ *Configuration mise à jour!* \n_${nomVar} = ${valeur}_`)
+      }
     }
-  }
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur setvar:", e)
     return await m.sendErr(e)
   }
 })
 
-kord({
-cmd: "getvar",
-  desc: "get all variables from config.js/config.env",
+King({
+  cmd: "getvar",
+  desc: "🔍 Obtenir une variable de configuration",
   fromMe: true,
   type: "config",
+  category: "administration"
 }, async (m, text) => {
   try {
-    if (!text) return m.reply("_*provide var name...*_\n_example: getvar SUDO_")
-    const key = text.trim().toUpperCase()
-    if (typeof key !== 'string' || !key.trim()) {
-    await m.reply("_*Invalid variable!...*_")
+    if (!text) return m.reply("❌ *Nom variable manquant* \n_Exemple: .getvar SUDO_")
+    
+    const nomVar = text.trim().toUpperCase()
+    
+    if (typeof nomVar !== 'string' || !nomVar.trim()) {
+      await m.reply("❌ *Nom de variable invalide*")
     } else if (await envExists()) {
-    return await m.send(`*${key}*: ${process.env[key]}`)
-    } else if (config()[key]) {
-    return await m.send(`*${key}*: ${config()[key]}`)
+      return await m.send(`🔍 *${nomVar}:* \n\`${process.env[nomVar] || "Non définie"}\``)
+    } else if (config()[nomVar]) {
+      return await m.send(`🔍 *${nomVar}:* \n\`${config()[nomVar]}\``)
     } else {
-    await m.reply(`_*'${key}' not found in config*_`)
+      await m.reply(`❌ *Variable '${nomVar}' non trouvée*`)
     }
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur getvar:", e)
     return await m.sendErr(e)
   }
 })
 
-kord({
+King({
   cmd: 'delvar',
-  desc: "delete a variable/setting",
+  desc: "🗑️ Supprimer une variable",
   fromMe: true,
   type: "config",
+  category: "administration"
 }, async (m, text) => {
   try {
-  const key = text.trim().toUpperCase()
-  const platformInfo = getPlatformInfo()
-  if (platformInfo.platform === "render") {
-    try {
-      await m.send(`_*successfully deleted ${key}*_\n\n> restarting..`)
-      await delVar(key)
-    } catch (error) {
-      await m.send(`*Error deleting variable:* ${error.message}`)
-    }
-  } else {
-    var isExist = await envExists()
-    if (isExist) {
-      await updateEnv(key, null, { remove: true})
+    const nomVar = text.trim().toUpperCase()
+    if (!nomVar) return await m.send("❌ *Nom variable manquant*")
+    
+    const infoPlateforme = getPlatformInfo()
+    
+    if (infoPlateforme.platform === "render") {
+      try {
+        await m.send(`🗑️ *Variable supprimée!* \n_${nomVar}_\n🔄 _Redémarrage..._`)
+        await delVar(nomVar)
+      } catch (error) {
+        await m.send(`❌ *Erreur suppression:* ${error.message}`)
+      }
     } else {
-      await updateConfig(key, null, {remove: true})
+      const existeEnv = await envExists()
+      if (existeEnv) {
+        await updateEnv(nomVar, null, { remove: true })
+      } else {
+        await updateConfig(nomVar, null, { remove: true })
+      }
+      await m.send(`🗑️ *Variable supprimée!* \n_${nomVar}_`)
     }
-    await m.send(`_*successfully deleted ${key}*_`)
-  }
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur delvar:", e)
     return await m.sendErr(e)
   }
 })
 
-kord({
+King({
   cmd: "allvar",
-  desc: "get all variables/settings",
+  desc: "📋 Lister toutes les variables",
   fromMe: true,
   type: "config",
-}, async (m, text)=> {
+  category: "administration"
+}, async (m, text) => {
   try {
-  const platformInfo = getPlatformInfo()
-  
-  if (platformInfo.platform === "render") {
-    try {
-      const result = await getVars()
-      if (result.success) {
-  var data = '*All Vars (Render)*\n\n'
-  for (var item of result.data) {
-    const variable = item.envVar
-    data += `*${variable.key}*: ${variable.value}\n`
-  }
-  return await m.send(data)
-}
-    } catch (error) {
-      await m.send(`*Error getting variables:* ${error.message}`)
-      return
+    const infoPlateforme = getPlatformInfo()
+    
+    if (infoPlateforme.platform === "render") {
+      try {
+        const resultat = await getVars()
+        if (resultat.success) {
+          let donnees = '🌐 *VARIABLES (RENDER)*\n\n'
+          for (let item of resultat.data) {
+            const variable = item.envVar
+            donnees += `• *${variable.key}*: \`${variable.value}\`\n`
+          }
+          return await m.send(donnees)
+        }
+      } catch (error) {
+        await m.send(`❌ *Erreur lecture variables:* ${error.message}`)
+        return
+      }
     }
-  }
-  if (await envExists()) {
-    var h = await listEnvKeys()
-      var daa = '*All Vars*\n\n'
-    for (var hh of h) {
-      daa += `*${hh}*: ${process.env[hh]}\n`
+    
+    if (await envExists()) {
+      const cles = await listEnvKeys()
+      let donnees = '🌐 *VARIABLES*\n\n'
+      for (let cle of cles) {
+        donnees += `• *${cle}*: \`${process.env[cle]}\`\n`
+      }
+      return await m.send(donnees)
+    } else {
+      const donnees = '🌐 *VARIABLES*\n\n' + Object.keys(config())
+        .map(cle => `• *${cle}:* \`${config()[cle]}\``)
+        .join('\n')
+      return await m.send(donnees)
     }
-    return await m.send(`${daa}`)
-  } else {
-    const data = '*All Vars*\n\n' + Object.keys(config())
-    .map(key => `*${key}:* ${config()[key]}`)
-    .join('\n')
-    return await m.send(`${data}`)
-  }
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur allvar:", e)
     return await m.sendErr(e)
   }
 })
 
-async function updateAllConfig(key, value, m) {
-  const platformInfo = getPlatformInfo()
-  if (platformInfo.platform === "render") {
+// ==================== FONCTIONS UTILITAIRES ====================
+
+async function mettreAJourConfig(nomVar, valeur, m) {
+  const infoPlateforme = getPlatformInfo()
+  
+  if (infoPlateforme.platform === "render") {
     try {
-      await m.send(`*_${key} set to ${value}_*\n_Restarting..._`)
-      if (process.env[key]) {
-        await setVar(key, value)
-      } else {
-        await setVar(key, value)
-      }
+      await m.send(`✅ *${nomVar} = ${valeur}*\n🔄 _Redémarrage..._`)
+      await setVar(nomVar, valeur)
     } catch (error) {
-      await m.send(`*Error updating variable:* ${error.message}`)
+      await m.send(`❌ *Erreur mise à jour:* ${error.message}`)
     }
   } else {
-    var isExist = await envExists()
-    if (isExist) {
-      if (!process.env[key]) {
-        await updateEnv(key, value)
-        return await m.send(`*_${key} set to ${value}_*`)
+    const existeEnv = await envExists()
+    if (existeEnv) {
+      if (!process.env[nomVar]) {
+        await updateEnv(nomVar, valeur)
+        return await m.send(`✅ *${nomVar} = ${valeur}*`)
       } else {
-        await updateEnv(key, value)
-        return await m.send(`*_${key} set to ${value}_*`)
+        await updateEnv(nomVar, valeur)
+        return await m.send(`✅ *${nomVar} = ${valeur}*`)
       }
     } else {
-      await updateConfig(key, value)
-      return await m.send(`*_${key} set to ${value}_*`)
+      await updateConfig(nomVar, valeur)
+      return await m.send(`✅ *${nomVar} = ${valeur}*`)
     }
   }
 }
 
-function toggle(cmdName, envKey, displayName) {
-  try {
+function creerToggle(nomCommande, varEnv, nomAffichage) {
   return async (m, text, cmd) => {
-    const allowed = [...myMods().map(x => x + '@s.whatsapp.net'), m.ownerJid]
-    text = text.split(" ")[0].toLowerCase()
-const validInputs = ['on', 'off', 'true', 'false']
+    try {
+      const autorises = [...myMods().map(x => x + '@s.whatsapp.net'), m.ownerJid]
+      const option = text.split(" ")[0]?.toLowerCase()
+      const optionsValides = ['on', 'off', 'true', 'false']
 
-if (!validInputs.includes(text)) {
-  return await m.send(`*Invalid option:* _${text}_\n_Use only 'on', 'off', 'true', or 'false'_`)
-}
-
-if (!text) {
-  if (config().RES_TYPE.toLowerCase() === "button") {
-    return await m.btnText("*Toggle on/off*", {
-      [`${cmd} on`]: "ON",
-      [`${cmd} off`]: "OFF",
-    })
-  } else if (config().RES_TYPE.toLowerCase() === "poll") {
-    return await m.send({
-      name: "*Toggle on/off*",
-      values: [{ name: "on", id: `${cmdName} on` }, { name: "off", id: `${cmdName} off` }],
-      withPrefix: true,
-      onlyOnce: true,
-      participates: allowed,
-      selectableCount: true,
-    }, {}, "poll")
-  } else {
-    return await m.send(`*Use:* ${cmd} on/off`)
-  }
-}
-    
-    var t = toBoolean(text)
-    var envVal = process.env[envKey]
-    var configVal = config()[envKey]
-    if ((envVal !== undefined && toBoolean(envVal) == t) || (configVal !== undefined && toBoolean(configVal) == t)) {
-  return await m.send(`*${displayName} already set to ${text}..*`)
-    }
-    
-    await updateAllConfig(envKey, text, m)
-  }
-  } catch (e) {
-    console.log("cmd error", e)
-    return m.sendErr(e)
-  }
-}
-
-function deltog() {
-  try {
-    return async (m, text, cmd) => {
-      const allowed = [...myMods().map(x => x + '@s.whatsapp.net'), m.ownerJid]
-      text = text.split(" ")[0].toLowerCase()
-      const validInputs = ['on', 'p', 'chat', 'g', 'off']
-
-      if (text && !validInputs.includes(text) && !text.match(/^\d+$/)) {
-        return await m.send(`*Invalid option:* _${text}_\n_Use: 'on/p' (owner), 'chat/g' (in chat), 'off' (disable), or phone number_`)
+      if (option && !optionsValides.includes(option)) {
+        return await m.send(`❌ *Option invalide:* _${option}_\n_Utilisez: 'on', 'off', 'true' ou 'false'_`)
       }
 
-      if (!text) {
+      if (!option) {
         if (config().RES_TYPE.toLowerCase() === "button") {
-          return await m.btnText("*Antidelete Settings*", {
-            [`${cmd} on`]: "TO OWNER",
-            [`${cmd} chat`]: "IN CHAT",
-            [`${cmd} off`]: "DISABLE",
+          return await m.btnText(`⚙️ *${nomAffichage}*`, {
+            [`${cmd} on`]: "🟢 ACTIVER",
+            [`${cmd} off`]: "🔴 DÉSACTIVER",
           })
         } else if (config().RES_TYPE.toLowerCase() === "poll") {
           return await m.send({
-            name: "*Antidelete Settings*",
+            name: `⚙️ *${nomAffichage}*`,
             values: [
-              { name: "To Owner", id: `${cmd} on` },
-              { name: "In Chat", id: `${cmd} chat` },
-              { name: "Disable", id: `${cmd} off` }
+              { name: "🟢 Activer", id: `${nomCommande} on` },
+              { name: "🔴 Désactiver", id: `${nomCommande} off` }
             ],
             withPrefix: true,
             onlyOnce: true,
-            participates: allowed,
+            participates: autorises,
             selectableCount: true,
           }, {}, "poll")
         } else {
-          return await m.send(`*Use:* ${cmd} on/p/chat/g/off or phone number\n\n*Options:*\n• on/p - Send to owner\n• chat/g - Send in chat\n• off - Disable\n• [number] - Send to specific number`)
+          return await m.send(`⚙️ *${nomAffichage}*\n_Utilisez: ${cmd} on/off_`)
+        }
+      }
+      
+      const valeurBool = toBoolean(option)
+      const valeurEnv = process.env[varEnv]
+      const valeurConfig = config()[varEnv]
+      
+      if ((valeurEnv !== undefined && toBoolean(valeurEnv) == valeurBool) || 
+          (valeurConfig !== undefined && toBoolean(valeurConfig) == valeurBool)) {
+        return await m.send(`ℹ️ *${nomAffichage} déjà sur ${option}*`)
+      }
+      
+      await mettreAJourConfig(varEnv, option, m)
+    } catch (e) {
+      console.error(`❌ Erreur ${nomCommande}:`, e)
+      return m.sendErr(e)
+    }
+  }
+}
+
+function creerToggleAntiDelete() {
+  return async (m, text, cmd) => {
+    try {
+      const autorises = [...myMods().map(x => x + '@s.whatsapp.net'), m.ownerJid]
+      const option = text.split(" ")[0]?.toLowerCase()
+      const optionsValides = ['on', 'p', 'chat', 'g', 'off']
+
+      if (option && !optionsValides.includes(option) && !option.match(/^\d+$/)) {
+        return await m.send(`❌ *Option invalide:* _${option}_\n_Utilisez: 'on/p' (propriétaire), 'chat/g' (dans le chat), 'off' (désactiver), ou un numéro_`)
+      }
+
+      if (!option) {
+        if (config().RES_TYPE.toLowerCase() === "button") {
+          return await m.btnText("🛡️ *ANTI-SUPPRESSION*", {
+            [`${cmd} on`]: "👑 AU PROPRIÉTAIRE",
+            [`${cmd} chat`]: "💬 DANS LE CHAT",
+            [`${cmd} off`]: "🚫 DÉSACTIVER",
+          })
+        } else if (config().RES_TYPE.toLowerCase() === "poll") {
+          return await m.send({
+            name: "🛡️ *ANTI-SUPPRESSION*",
+            values: [
+              { name: "👑 Au propriétaire", id: `${cmd} on` },
+              { name: "💬 Dans le chat", id: `${cmd} chat` },
+              { name: "🚫 Désactiver", id: `${cmd} off` }
+            ],
+            withPrefix: true,
+            onlyOnce: true,
+            participates: autorises,
+            selectableCount: true,
+          }, {}, "poll")
+        } else {
+          return await m.send(`🛡️ *ANTI-SUPPRESSION*\n\n_Options:_\n• on/p - Envoyer au propriétaire\n• chat/g - Envoyer dans le chat\n• off - Désactiver\n• [numéro] - Envoyer à un numéro spécifique`)
         }
       }
 
-      let finalValue = text
-      if (text.match(/^\d+$/)) {
-        finalValue = text
+      let valeurFinale = option
+      if (option.match(/^\d+$/)) {
+        valeurFinale = option
       }
 
-      var envVal = process.env.ANTIDELETE
-      var configVal = config().ANTIDELETE
-      if ((envVal !== undefined && envVal === finalValue) || (configVal !== undefined && configVal === finalValue)) {
-        return await m.send(`*Anti Delete already set to ${text}..*`)
+      const valeurEnv = process.env.ANTIDELETE
+      const valeurConfig = config().ANTIDELETE
+      
+      if ((valeurEnv !== undefined && valeurEnv === valeurFinale) || 
+          (valeurConfig !== undefined && valeurConfig === valeurFinale)) {
+        return await m.send(`ℹ️ *Anti-suppression déjà sur ${option}*`)
       }
 
-      await updateAllConfig('ANTIDELETE', finalValue, m)
+      await mettreAJourConfig('ANTIDELETE', valeurFinale, m)
+    } catch (e) {
+      console.error("❌ Erreur antidelete:", e)
+      return m.sendErr(e)
     }
-  } catch (e) {
-    console.log("cmd error", e)
-    return m.sendErr(e)
   }
 }
 
+// ==================== COMMANDES DE CONFIGURATION ====================
 
-kord({
+King({
   cmd: "readstatus",
-  desc: "turn on/off readstatus",
+  desc: "👀 Lecture des statuts",
   fromMe: true,
   type: "config",
-}, toggle("readstatus", "STATUS_VIEW", "Read Status"))
+  category: "fonctionnalités"
+}, creerToggle("readstatus", "STATUS_VIEW", "Lecture des statuts"))
 
-kord({
+King({
   cmd: "likestatus",
-  desc: "turn on/off likestatus",
+  desc: "❤️ Likes des statuts",
   fromMe: true,
   type: "config",
-}, toggle("likestatus", "LIKE_STATUS", "Like Status"))
+  category: "fonctionnalités"
+}, creerToggle("likestatus", "LIKE_STATUS", "Likes des statuts"))
 
-kord({
+King({
   cmd: "startupmsg",
-  desc: "turn on/off startupmsg",
+  desc: "🚀 Message de démarrage",
   fromMe: true,
   type: "config",
-}, toggle("startupmsg", "STARTUP_MSG", "Startup Msg"))
+  category: "fonctionnalités"
+}, creerToggle("startupmsg", "STARTUP_MSG", "Message de démarrage"))
 
-
-kord({
+King({
   cmd: "alwaysonline",
-  desc: "turn on/off always online",
+  desc: "🟢 Toujours en ligne",
   fromMe: true,
   type: "config",
-}, toggle("alwaysonline", "ALWAYS_ONLINE", "Always Online"))
+  category: "fonctionnalités"
+}, creerToggle("alwaysonline", "ALWAYS_ONLINE", "Toujours en ligne"))
 
-kord({
+King({
   cmd: "antidelete",
-  desc: "configure antidelete settings",
+  desc: "🛡️ Anti-suppression",
   fromMe: true,
   type: "config",
-}, deltog())
+  category: "sécurité"
+}, creerToggleAntiDelete())
 
-
-kord({
+King({
   cmd: "antiedit",
-  desc: "turn on/off Anti-Edit",
+  desc: "✏️ Anti-modification",
   fromMe: true,
   type: "config",
-}, toggle("antiedit", "ANTI_EDIT", "Anti Edit"))
+  category: "sécurité"
+}, creerToggle("antiedit", "ANTI_EDIT", "Anti-modification"))
 
-kord({
+King({
   cmd: "antieditchat",
-  desc: "turn on/off antiedit in chat",
+  desc: "💬 Anti-modification dans le chat",
   fromMe: true,
   type: "config",
-}, toggle("antieditchat", "ANTI_EDIT_IN_CHAT", "Anti Edit In Chat"))
+  category: "sécurité"
+}, creerToggle("antieditchat", "ANTI_EDIT_IN_CHAT", "Anti-modification dans le chat"))
 
-kord({
+King({
   cmd: "savestatus",
-  desc: "turn on/off save status",
+  desc: "💾 Sauvegarde des statuts",
   fromMe: true,
   type: "config",
-}, toggle("savestatus", "SAVE_STATUS", "Save Status"))
+  category: "fonctionnalités"
+}, creerToggle("savestatus", "SAVE_STATUS", "Sauvegarde des statuts"))
 
-kord({
+King({
   cmd: "cmdreact",
-  desc: "turn on/off command react",
+  desc: "⚡ Réactions aux commandes",
   fromMe: true,
   type: "config",
-}, toggle("cmdreact", "CMD_REACT", "Command React"))
+  category: "fonctionnalités"
+}, creerToggle("cmdreact", "CMD_REACT", "Réactions aux commandes"))
 
-kord({
+King({
   cmd: "readmsg|read",
-  desc: "turn on/off read message",
+  desc: "📖 Lecture des messages",
   fromMe: true,
   type: "config",
-}, toggle("readmsg", "READ_MESSAGE", "Read Message"))
+  category: "fonctionnalités"
+}, creerToggle("readmsg", "READ_MESSAGE", "Lecture des messages"))
 
-kord({
+King({
   cmd: "rejectcall",
-  desc: "turn on/off reject call",
+  desc: "📞 Rejet des appels",
   fromMe: true,
   type: "config",
-}, toggle("rejectcall", "REJECT_CALL", "Reject Call"))
+  category: "sécurité"
+}, creerToggle("rejectcall", "REJECT_CALL", "Rejet des appels"))
 
-kord({
+// ==================== GESTION DES SUDO ====================
+
+King({
   cmd: "setsudo",
-  desc: "add a user to sudo",
+  desc: "👑 Ajouter un utilisateur Sudo",
   fromMe: true,
   type: "config",
+  category: "administration"
 }, async (m, text) => {
   try {
-  let users = []
+    let utilisateurs = []
 
-  if (!text && !m.quoted) return await m.send("_Reply/mention/provide a user or type 'admins'_")
-
-if (text.trim().toLowerCase() === 'admins') {
-  if (!m.isGroup) return await m.send("_'admins' can only be used in groups_")
-  const admins = await getAdmins(m.client, m.chat)
-  users = admins.map(j => j.split('@')[0])
-} else {
-  const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
-  if (!u) return await m.send("_Reply/mention/provide a user_")
-  users = [u.split('@')[0]]
-}
-
-  const current = config().SUDO || ""
-  const cNumbers = current.split(',').map(n => n.trim()).filter(n => n)
-  const existing = new Set(cNumbers)
-  const toAdd = users.filter(u => !existing.has(u))
-  if (toAdd.length === 0) return await m.send("_User(s) already a sudo_")
-  const nsn = [...existing, ...toAdd].join(",")
-
-  if (m.client.platform === "render") {
-    try {
-      await m.send(`\`\`\`${toAdd.join(', ')} added to sudo list...\n_Restarting\`\`\``)
-      await setVar("SUDO", nsn)
-    } catch (er) {
-      console.error(er)
-      return await m.send(`error: ${er}`)
+    if (!text && !m.quoted) {
+      return await m.send("❌ *Utilisateur manquant* \n_Répondez, mentionnez ou fournissez un utilisateur, ou tapez 'admins'_")
     }
-  }
 
-  const isExist = await envExists()
-  if (isExist) {
-    await updateEnv("SUDO", nsn)
-    return await m.send(`\`\`\`${toAdd.join(', ')} added to sudo list...\`\`\``)
-  } else {
-    await updateConfig("SUDO", nsn, { replace: true })
-    return await m.send(`\`\`\`${toAdd.join(', ')} added to sudo list...\`\`\``)
-  }
-  } catch (e) {
-    console.log("cmd error", e)
-    return await m.sendErr(e)
-  }
-})
-
-kord({
-  cmd: "delsudo",
-  desc: "delete user from sudo list",
-  fromMe: true,
-  type: "config",
-}, async (m, text) => {
-  try {
-  let users = []
-
-  if (!text && !m.quoted) return await m.send("_Reply/mention/provide a user or type 'admins'_")
-
-if (text.trim().toLowerCase() === 'admins') {
-  if (!m.isGroup) return await m.send("_'admins' can only be used in groups_")
-  const admins = await getAdmins(m.client, m.chat)
-  users = admins.map(j => j.split('@')[0])
-} else {
-  const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
-  if (!u) return await m.send("_Reply/mention/provide a user_")
-  users = [u.split('@')[0]]
-}
-
-  const current = config().SUDO || ""
-  const cNumbers = current.split(',').map(n => n.trim()).filter(n => n)
-  const filtered = cNumbers.filter(n => !users.includes(n))
-  if (filtered.length === cNumbers.length) return await m.send("_User(s) not in sudo list_")
-  const nsn = filtered.length ? filtered.join(",") : "false"
-
-  if (m.client.platform === "render") {
-    try {
-      await m.send(`\`\`\`${users.join(', ')} removed from sudo list...\n_Restarting\`\`\``)
-      await setVar("SUDO", nsn)
-    } catch (er) {
-      console.error(er)
-      return await m.send(`error: ${er}`)
-    }
-  }
-
-  const isExist = await envExists()
-  if (isExist) {
-    await updateEnv("SUDO", nsn)
-    return await m.send(`\`\`\`${users.join(', ')} removed from sudo list...\`\`\``)
-  } else {
-    await updateConfig("SUDO", nsn, { replace: true })
-    return await m.send(`\`\`\`${users.join(', ')} removed from sudo list...\`\`\``)
-  }
-  } catch (e) {
-    console.log("cmd error", e)
-    return await m.sendErr(e)
-  }
-})
-
-
-kord({
-cmd: "getsudo|allsudo",
-  desc: "get all sudos",
-  fromMe: true,
-  type: "config",
-}, async (m, text) => {
-  try {
-    var sudo = (config().SUDO || "")
-    .split(",")
-    .map(n => n.trim())
-    .filter(n => n)
-    if (sudo.length == 0) return await m.send("_Sudo list is empty_")
-    var msg = "「 SUDO LIST 」\n"
-    var mj = []
-    for (var s of sudo) {
-    var jid = s.trim() + '@s.whatsapp.net'
-    msg += `❑ @${s}\n`
-    mj.push(jid)
-    }
-    var fmsg = `\`\`\`${msg}\`\`\``
-    return await m.send(fmsg, {mentions: mj
-})
-  } catch (e) {
-    console.log("cmd error", e)
-    return await m.sendErr(e)
-  }
-})
-
-kord({
-  cmd: "setmod|addmod",
-  desc: "add a user to mod list",
-  fromMe: true,
-  type: "config",
-}, async (m, text) => {
-  try {
-  let users = []
-
-  if (!text && !m.quoted) return await m.send("_Reply/mention/provide a user or type 'admins'_")
-
-if (text.trim().toLowerCase() === 'admins') {
-  if (!m.isGroup) return await m.send("_'admins' can only be used in groups_")
-  const admins = await getAdmins(m.client, m.chat)
-  users = admins.map(j => j.split('@')[0])
-} else {
-  const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
-  if (!u) return await m.send("_Reply/mention/provide a user_")
-  users = [u.split('@')[0]]
-}
-
-  const current = config().MODS || ""
-  const cNumbers = current.split(',').map(n => n.trim()).filter(n => n)
-  const existing = new Set(cNumbers)
-  const toAdd = users.filter(u => !existing.has(u))
-  if (toAdd.length === 0) return await m.send("_User(s) already a mod_")
-  const nsn = [...existing, ...toAdd].join(",")
-
-  if (m.client.platform === "render") {
-    try {
-      await m.send(`\`\`\`${toAdd.join(', ')} added to mod list...\n_Restarting\`\`\``)
-      await setVar("MODS", nsn)
-    } catch (er) {
-      console.error(er)
-      return await m.send(`error: ${er}`)
-    }
-  }
-
-  const isExist = await envExists()
-  if (isExist) {
-    await updateEnv("MODS", nsn)
-    return await m.send(`\`\`\`${toAdd.join(', ')} added to mod list...\`\`\``)
-  } else {
-    await updateConfig("MODS", nsn, { replace: true })
-    return await m.send(`\`\`\`${toAdd.join(', ')} added to mod list...\`\`\``)
-  }
-  } catch (e) {
-    console.log("cmd error", e)
-    return await m.sendErr(e)
-  }
-})
-
-kord({
-  cmd: "delmod",
-  desc: "delete user from mod list",
-  fromMe: true,
-  type: "config",
-}, async (m, text) => {
-  try {
-  let users = []
-
-  if (!text && !m.quoted) return await m.send("_Reply/mention/provide a user or type 'admins'_")
-
-if (text.trim().toLowerCase() === 'admins') {
-  if (!m.isGroup) return await m.send("_'admins' can only be used in groups_")
-  const admins = await getAdmins(m.client, m.chat)
-  users = admins.map(j => j.split('@')[0])
-} else {
-  const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
-  if (!u) return await m.send("_Reply/mention/provide a user_")
-  users = [u.split('@')[0]]
-}
-
-  const current = config().MODS || ""
-  const cNumbers = current.split(',').map(n => n.trim()).filter(n => n)
-  const filtered = cNumbers.filter(n => !users.includes(n))
-  if (filtered.length === cNumbers.length) return await m.send("_User(s) not in mod list_")
-  const nsn = filtered.length ? filtered.join(",") : "false"
-
-  if (m.client.platform === "render") {
-    try {
-      await m.send(`\`\`\`${users.join(', ')} removed from mod list...\n_Restarting\`\`\``)
-      await setVar("MODS", nsn)
-    } catch (er) {
-      console.error(er)
-      return await m.send(`error: ${er}`)
-    }
-  }
-
-  const isExist = await envExists()
-  if (isExist) {
-    await updateEnv("MODS", nsn)
-    return await m.send(`\`\`\`${users.join(', ')} removed from mod list...\`\`\``)
-  } else {
-    await updateConfig("MODS", nsn, { replace: true })
-    return await m.send(`\`\`\`${users.join(', ')} removed from mod list...\`\`\``)
-  }
-  } catch (e) {
-    console.log("cmd error", e)
-    return await m.sendErr(e)
-  }
-})
-
-kord({
-cmd: "getmods",
-  desc: "get all mods",
-  fromMe: true,
-  type: "config",
-}, async (m, text) => {
-  try {
-    var modList = (config().MODS || "")
-    .split(",")
-    .map(n => n.trim())
-    .filter(n => n)
-    
-    if (modList.length == 0)
-    return await m.send("_Mod list is empty_")
-    var msg = "「 MOD LIST 」\n"
-    var mentionJids = []
-    for (var u of modList) {
-    msg += `❑ @${u}\n`
-    mentionJids.push(u + '@s.whatsapp.net')
-    }
-    var fmsg = `\`\`\`${msg}\`\`\``
-    return await m.send(fmsg, {
-    mentions: mentionJids })
-  } catch (e) {
-    console.log("cmd error", e)
-    return await m.sendErr(e)
-  }
-})
-
-
-kord({
-cmd: "mode",
-  desc: "set bot to private or public",
-  fromMe: true,
-  type: "config",
-}, async (m, text) => {
-  try {
-    const allowed = [...myMods().map(x => x + '@s.whatsapp.net'), m.ownerJid]
-    var cmdName = "mode"
-    if (!text) return config().RES_TYPE.toLowerCase() == "poll" ? await m.send({
-    name: "*Toggle private/public*",
-    values: [{name: "private", id: `${cmdName} private`}, {name: "public", id: `${cmdName} public`}],
-    withPrefix: true,
-    onlyOnce: true,
-    participates: [m.ownerJid, ],
-    selectableCount: true,
-    }, {}, "poll") : await m.send("Use either public or private")
-    if (text.toLowerCase() == "private") {
-    if (config().WORKTYPE.toLowerCase() == "private") return await m.send("_Bot is already private.._")
-    else {
-    await updateAllConfig("WORKTYPE", "private", m)
-    }
-    } else if (text.toLowerCase() == "public") {
-    if (config().WORKTYPE.toLowerCase() == "public") return await m.send("_Bot is already public.._")
-    else {
-    await updateAllConfig("WORKTYPE", "public", m)
-    }
+    if (text.trim().toLowerCase() === 'admins') {
+      if (!m.isGroup) return await m.send("❌ *'admins' utilisable uniquement en groupe*")
+      const admins = await getAdmins(m.client, m.chat)
+      utilisateurs = admins.map(j => j.split('@')[0])
     } else {
-    return config().RES_TYPE.toLowerCase() == "poll" ? await m.send({
-    name: "*Toggle private/public*",
-    values: [{name: "private", id: `${cmdName} private`}, {name: "public", id: `${cmdName} public`}],
-    withPrefix: true,
-    onlyOnce: true,
-    participates: allowed,
-    selectableCount: true,
-    }, {}, "poll") : await m.send("Use either public or private")
+      const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
+      if (!u) return await m.send("❌ *Utilisateur manquant*")
+      utilisateurs = [u.split('@')[0]]
+    }
+
+    const sudoActuel = config().SUDO || ""
+    const numerosActuels = sudoActuel.split(',').map(n => n.trim()).filter(n => n)
+    const existants = new Set(numerosActuels)
+    const aAjouter = utilisateurs.filter(u => !existants.has(u))
+    
+    if (aAjouter.length === 0) {
+      return await m.send("ℹ️ *Utilisateur(s) déjà Sudo*")
+    }
+    
+    const nouveauSudo = [...existants, ...aAjouter].join(",")
+
+    if (m.client.platform === "render") {
+      try {
+        await m.send(`👑 *${aAjouter.join(', ')} ajouté(s) aux Sudo*\n🔄 _Redémarrage..._`)
+        await setVar("SUDO", nouveauSudo)
+      } catch (er) {
+        console.error(er)
+        return await m.send(`❌ *Erreur:* ${er}`)
+      }
+    }
+
+    const existeEnv = await envExists()
+    if (existeEnv) {
+      await updateEnv("SUDO", nouveauSudo)
+      return await m.send(`👑 *${aAjouter.join(', ')} ajouté(s) aux Sudo*`)
+    } else {
+      await updateConfig("SUDO", nouveauSudo, { replace: true })
+      return await m.send(`👑 *${aAjouter.join(', ')} ajouté(s) aux Sudo*`)
     }
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur setsudo:", e)
     return await m.sendErr(e)
   }
 })
 
-kord({
-cmd: "statusemoji",
-  desc: "set like status emoji",
+King({
+  cmd: "delsudo",
+  desc: "🗑️ Retirer un utilisateur Sudo",
   fromMe: true,
   type: "config",
+  category: "administration"
 }, async (m, text) => {
   try {
-    if (!text) return await m.send("_provide an emoji:emojis_\n_example: statusemoji 🤍 or statusemoji 🤍,🥏")
-    await updateAllConfig("STATUS_EMOJI", text, m)
+    let utilisateurs = []
+
+    if (!text && !m.quoted) {
+      return await m.send("❌ *Utilisateur manquant* \n_Répondez, mentionnez ou fournissez un utilisateur, ou tapez 'admins'_")
+    }
+
+    if (text.trim().toLowerCase() === 'admins') {
+      if (!m.isGroup) return await m.send("❌ *'admins' utilisable uniquement en groupe*")
+      const admins = await getAdmins(m.client, m.chat)
+      utilisateurs = admins.map(j => j.split('@')[0])
+    } else {
+      const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
+      if (!u) return await m.send("❌ *Utilisateur manquant*")
+      utilisateurs = [u.split('@')[0]]
+    }
+
+    const sudoActuel = config().SUDO || ""
+    const numerosActuels = sudoActuel.split(',').map(n => n.trim()).filter(n => n)
+    const filtres = numerosActuels.filter(n => !utilisateurs.includes(n))
+    
+    if (filtres.length === numerosActuels.length) {
+      return await m.send("❌ *Utilisateur(s) non trouvé(s) dans les Sudo*")
+    }
+    
+    const nouveauSudo = filtres.length ? filtres.join(",") : "false"
+
+    if (m.client.platform === "render") {
+      try {
+        await m.send(`🗑️ *${utilisateurs.join(', ')} retiré(s) des Sudo*\n🔄 _Redémarrage..._`)
+        await setVar("SUDO", nouveauSudo)
+      } catch (er) {
+        console.error(er)
+        return await m.send(`❌ *Erreur:* ${er}`)
+      }
+    }
+
+    const existeEnv = await envExists()
+    if (existeEnv) {
+      await updateEnv("SUDO", nouveauSudo)
+      return await m.send(`🗑️ *${utilisateurs.join(', ')} retiré(s) des Sudo*`)
+    } else {
+      await updateConfig("SUDO", nouveauSudo, { replace: true })
+      return await m.send(`🗑️ *${utilisateurs.join(', ')} retiré(s) des Sudo*`)
+    }
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur delsudo:", e)
     return await m.sendErr(e)
   }
 })
 
-kord({
+King({
+  cmd: "getsudo|allsudo",
+  desc: "📋 Liste des utilisateurs Sudo",
+  fromMe: true,
+  type: "config",
+  category: "administration"
+}, async (m, text) => {
+  try {
+    const sudo = (config().SUDO || "")
+      .split(",")
+      .map(n => n.trim())
+      .filter(n => n)
+      
+    if (sudo.length === 0) {
+      return await m.send("📭 *Liste Sudo vide*")
+    }
+    
+    let message = "👑 *LISTE SUDO*\n\n"
+    const mentions = []
+    
+    for (let s of sudo) {
+      const jid = s.trim() + '@s.whatsapp.net'
+      message += `• @${s}\n`
+      mentions.push(jid)
+    }
+    
+    return await m.send(message, { mentions: mentions })
+  } catch (e) {
+    console.error("❌ Erreur getsudo:", e)
+    return await m.sendErr(e)
+  }
+})
+
+// ==================== GESTION DES MODS ====================
+
+King({
+  cmd: "setmod|addmod",
+  desc: "🛠️ Ajouter un modérateur",
+  fromMe: true,
+  type: "config",
+  category: "administration"
+}, async (m, text) => {
+  try {
+    let utilisateurs = []
+
+    if (!text && !m.quoted) {
+      return await m.send("❌ *Utilisateur manquant* \n_Répondez, mentionnez ou fournissez un utilisateur, ou tapez 'admins'_")
+    }
+
+    if (text.trim().toLowerCase() === 'admins') {
+      if (!m.isGroup) return await m.send("❌ *'admins' utilisable uniquement en groupe*")
+      const admins = await getAdmins(m.client, m.chat)
+      utilisateurs = admins.map(j => j.split('@')[0])
+    } else {
+      const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
+      if (!u) return await m.send("❌ *Utilisateur manquant*")
+      utilisateurs = [u.split('@')[0]]
+    }
+
+    const modsActuels = config().MODS || ""
+    const numerosActuels = modsActuels.split(',').map(n => n.trim()).filter(n => n)
+    const existants = new Set(numerosActuels)
+    const aAjouter = utilisateurs.filter(u => !existants.has(u))
+    
+    if (aAjouter.length === 0) {
+      return await m.send("ℹ️ *Utilisateur(s) déjà modérateur(s)*")
+    }
+    
+    const nouveauMods = [...existants, ...aAjouter].join(",")
+
+    if (m.client.platform === "render") {
+      try {
+        await m.send(`🛠️ *${aAjouter.join(', ')} ajouté(s) aux modérateurs*\n🔄 _Redémarrage..._`)
+        await setVar("MODS", nouveauMods)
+      } catch (er) {
+        console.error(er)
+        return await m.send(`❌ *Erreur:* ${er}`)
+      }
+    }
+
+    const existeEnv = await envExists()
+    if (existeEnv) {
+      await updateEnv("MODS", nouveauMods)
+      return await m.send(`🛠️ *${aAjouter.join(', ')} ajouté(s) aux modérateurs*`)
+    } else {
+      await updateConfig("MODS", nouveauMods, { replace: true })
+      return await m.send(`🛠️ *${aAjouter.join(', ')} ajouté(s) aux modérateurs*`)
+    }
+  } catch (e) {
+    console.error("❌ Erreur setmod:", e)
+    return await m.sendErr(e)
+  }
+})
+
+King({
+  cmd: "delmod",
+  desc: "🗑️ Retirer un modérateur",
+  fromMe: true,
+  type: "config",
+  category: "administration"
+}, async (m, text) => {
+  try {
+    let utilisateurs = []
+
+    if (!text && !m.quoted) {
+      return await m.send("❌ *Utilisateur manquant* \n_Répondez, mentionnez ou fournissez un utilisateur, ou tapez 'admins'_")
+    }
+
+    if (text.trim().toLowerCase() === 'admins') {
+      if (!m.isGroup) return await m.send("❌ *'admins' utilisable uniquement en groupe*")
+      const admins = await getAdmins(m.client, m.chat)
+      utilisateurs = admins.map(j => j.split('@')[0])
+    } else {
+      const u = m.mentionedJid?.[0] || m.quoted?.sender || (text || '').trim()
+      if (!u) return await m.send("❌ *Utilisateur manquant*")
+      utilisateurs = [u.split('@')[0]]
+    }
+
+    const modsActuels = config().MODS || ""
+    const numerosActuels = modsActuels.split(',').map(n => n.trim()).filter(n => n)
+    const filtres = numerosActuels.filter(n => !utilisateurs.includes(n))
+    
+    if (filtres.length === numerosActuels.length) {
+      return await m.send("❌ *Utilisateur(s) non trouvé(s) dans les modérateurs*")
+    }
+    
+    const nouveauMods = filtres.length ? filtres.join(",") : "false"
+
+    if (m.client.platform === "render") {
+      try {
+        await m.send(`🗑️ *${utilisateurs.join(', ')} retiré(s) des modérateurs*\n🔄 _Redémarrage..._`)
+        await setVar("MODS", nouveauMods)
+      } catch (er) {
+        console.error(er)
+        return await m.send(`❌ *Erreur:* ${er}`)
+      }
+    }
+
+    const existeEnv = await envExists()
+    if (existeEnv) {
+      await updateEnv("MODS", nouveauMods)
+      return await m.send(`🗑️ *${utilisateurs.join(', ')} retiré(s) des modérateurs*`)
+    } else {
+      await updateConfig("MODS", nouveauMods, { replace: true })
+      return await m.send(`🗑️ *${utilisateurs.join(', ')} retiré(s) des modérateurs*`)
+    }
+  } catch (e) {
+    console.error("❌ Erreur delmod:", e)
+    return await m.sendErr(e)
+  }
+})
+
+King({
+  cmd: "getmods",
+  desc: "📋 Liste des modérateurs",
+  fromMe: true,
+  type: "config",
+  category: "administration"
+}, async (m, text) => {
+  try {
+    const mods = (config().MODS || "")
+      .split(",")
+      .map(n => n.trim())
+      .filter(n => n)
+    
+    if (mods.length === 0) {
+      return await m.send("📭 *Liste modérateurs vide*")
+    }
+    
+    let message = "🛠️ *LISTE MODÉRATEURS*\n\n"
+    const mentions = []
+    
+    for (let u of mods) {
+      message += `• @${u}\n`
+      mentions.push(u + '@s.whatsapp.net')
+    }
+    
+    return await m.send(message, { mentions: mentions })
+  } catch (e) {
+    console.error("❌ Erreur getmods:", e)
+    return await m.sendErr(e)
+  }
+})
+
+// ==================== CONFIGURATIONS DIVERSES ====================
+
+King({
+  cmd: "mode",
+  desc: "🌐 Mode public/privé",
+  fromMe: true,
+  type: "config",
+  category: "administration"
+}, async (m, text) => {
+  try {
+    const autorises = [...myMods().map(x => x + '@s.whatsapp.net'), m.ownerJid]
+    const nomCommande = "mode"
+    
+    if (!text) {
+      if (config().RES_TYPE.toLowerCase() === "poll") {
+        return await m.send({
+          name: "🌐 *Mode du Bot*",
+          values: [
+            { name: "🔒 Privé", id: `${nomCommande} private` },
+            { name: "🌍 Public", id: `${nomCommande} public` }
+          ],
+          withPrefix: true,
+          onlyOnce: true,
+          participates: autorises,
+          selectableCount: true,
+        }, {}, "poll")
+      } else {
+        return await m.send("🌐 *Mode du Bot*\n_Utilisez: public ou private_")
+      }
+    }
+    
+    if (text.toLowerCase() === "private") {
+      if (config().WORKTYPE.toLowerCase() === "private") {
+        return await m.send("ℹ️ *Bot déjà en mode privé*")
+      } else {
+        await mettreAJourConfig("WORKTYPE", "private", m)
+      }
+    } else if (text.toLowerCase() === "public") {
+      if (config().WORKTYPE.toLowerCase() === "public") {
+        return await m.send("ℹ️ *Bot déjà en mode public*")
+      } else {
+        await mettreAJourConfig("WORKTYPE", "public", m)
+      }
+    } else {
+      if (config().RES_TYPE.toLowerCase() === "poll") {
+        return await m.send({
+          name: "🌐 *Mode du Bot*",
+          values: [
+            { name: "🔒 Privé", id: `${nomCommande} private` },
+            { name: "🌍 Public", id: `${nomCommande} public` }
+          ],
+          withPrefix: true,
+          onlyOnce: true,
+          participates: autorises,
+          selectableCount: true,
+        }, {}, "poll")
+      } else {
+        return await m.send("❌ *Option invalide*\n_Utilisez: public ou private_")
+      }
+    }
+  } catch (e) {
+    console.error("❌ Erreur mode:", e)
+    return await m.sendErr(e)
+  }
+})
+
+King({
+  cmd: "statusemoji",
+  desc: "😊 Emoji des statuts",
+  fromMe: true,
+  type: "config",
+  category: "personnalisation"
+}, async (m, text) => {
+  try {
+    if (!text) {
+      return await m.send("❌ *Emoji manquant* \n_Exemple: .statusemoji 🤍 ou .statusemoji 🤍,🥏_")
+    }
+    await mettreAJourConfig("STATUS_EMOJI", text, m)
+  } catch (e) {
+    console.error("❌ Erreur statusemoji:", e)
+    return await m.sendErr(e)
+  }
+})
+
+King({
   cmd: "savecmd",
-  desc: "set save emoji",
+  desc: "💾 Emoji de sauvegarde",
   fromMe: true,
   type: "config",
+  category: "personnalisation"
 }, async (m, text) => {
   try {
-    if (!text) return await m.send("_provide an emoji_\n_example: savecmd 🤍")
-    await updateAllConfig("SAVE_CMD", text, m)
+    if (!text) {
+      return await m.send("❌ *Emoji manquant* \n_Exemple: .savecmd 🤍_")
+    }
+    await mettreAJourConfig("SAVE_CMD", text, m)
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur savecmd:", e)
     return await m.sendErr(e)
   }
 })
 
-kord({
+King({
   cmd: "vvcmd",
-  desc: "set vv emoji",
+  desc: "🔓 Emoji vue unique",
   fromMe: true,
   type: "config",
+  category: "personnalisation"
 }, async (m, text) => {
   try {
-    if (!text) return await m.send("_provide an emoji_\n_example: vvcmd 🤍")
-    await updateAllConfig("VV_CMD", text, m)
+    if (!text) {
+      return await m.send("❌ *Emoji manquant* \n_Exemple: .vvcmd 🤍_")
+    }
+    await mettreAJourConfig("VV_CMD", text, m)
   } catch (e) {
-    console.log("cmd error", e)
+    console.error("❌ Erreur vvcmd:", e)
     return await m.sendErr(e)
   }
 })
+
+console.log("✅ Module configuration chargé avec succès")
