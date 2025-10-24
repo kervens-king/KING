@@ -1,62 +1,67 @@
 {
-  "name": "kord",
-  "version": "2.0.0",
-  "description": "whatsapp bot made with baileys",
+  "name": "king-bot",
+  "version": "1.0.0",
+  "description": "KING WhatsApp Bot - Développé par Kervens",
   "main": "index.js",
   "scripts": {
     "test": "node index.js",
-    "start": "FORCE_COLOR=1 npx pm2 start . --attach --name kord-v2 -- --color",
-    "build": "echo 'Not needed'",
-    "stop": "npx pm2 stop kord-ai"
+    "start": "FORCE_COLOR=1 npx pm2 start . --attach --name king-bot -- --color",
+    "build": "echo 'Build non requis'",
+    "stop": "npx pm2 stop king-bot",
+    "restart": "npx pm2 restart king-bot",
+    "logs": "npx pm2 logs king-bot",
+    "dev": "node index.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/M3264/Kord-Ai.git"
+    "url": "git+https://github.com/kervens-king/KING.git"
   },
   "keywords": [
-    "whatsapp-bot"
+    "whatsapp-bot",
+    "king-bot",
+    "baileys",
+    "automation",
+    "bot"
   ],
-  "author": "M3264",
-  "license": "MIT",
+  "author": "Kervens",
+  "license": "GPL-3.0-only",
   "bugs": {
-    "url": "https://github.com/M3264/Kord-Ai/issues"
+    "url": "https://github.com/kervens-king/KING/issues"
   },
-  "homepage": "https://github.com/M3264/Kord-Ai#readme",
+  "homepage": "https://github.com/kervens-king/KING#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
-    "axios": "^0.27.2",
-    "baileys": "^6.7.19",
+    "@whiskeysockets/baileys": "^6.7.19",
+    "axios": "^1.6.0",
     "chalk": "^4.1.2",
-    "cheerio": "^1.0.0-rc.10",
-    "child_process": "^1.0.2",
+    "cheerio": "^1.0.0-rc.12",
     "chokidar": "^3.6.0",
-    "dotenv": "^16.0.2",
-    "express": "latest",
-    "file-type": "^16.5.3",
+    "dotenv": "^16.3.0",
+    "express": "^4.18.0",
+    "file-type": "^18.0.0",
     "fluent-ffmpeg": "^2.1.2",
     "form-data": "^4.0.0",
-    "fs": "^0.0.1-security",
     "g-i-s": "^2.1.7",
     "jimp": "^1.6.0",
     "link-preview-js": "^3.0.14",
     "lodash.debounce": "^4.0.8",
     "moment-timezone": "^0.5.34",
     "mongoose": "^8.15.1",
-    "node-cache": "latest",
+    "node-cache": "^5.1.2",
     "node-cron": "^3.0.0",
     "node-fetch": "^2.6.1",
     "node-webpmux": "^3.1.1",
-    "os": "^0.1.2",
-    "path": "^0.12.7",
     "pdfkit": "^0.17.1",
-    "pino": "^7.9.2",
+    "pino": "^8.15.0",
     "pm2": "^6.0.5",
     "sequelize": "^6.21.4",
-    "sqlite": "5.1.1",
     "sqlite3": "^5.0.11",
     "uuid": "^11.1.0",
     "wa-sticker-formatter": "^4.4.4",
     "word-list": "^4.1.0",
-    "yarn": "^1.22.22",
     "yt-search": "^2.11.1"
   },
   "packageManager": "yarn@1.22.22"
