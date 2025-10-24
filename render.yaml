@@ -1,26 +1,49 @@
 services:
   - type: web
-    name: kord-bot
-    repo: https://github.com/M3264/Kord-Ai.git
-    branch: master
+    name: king-bot
+    repo: https://github.com/kervens-king/KING.git
+    branch: main
     env: docker
     dockerfilePath: Dockerfile
     plan: free
     autoDeploy: true
     envVars:
       - key: SESSION_ID
+        value: king_session_${render.id}
         sync: false
       - key: OWNER_NUMBER
+        value: "+50937277651"  
         sync: false
       - key: WORKTYPE
+        value: "public"
         sync: false
       - key: PREFIX
+        value: "."
         sync: false
       - key: TIMEZONE
+        value: "Africa/Porto-Novo"
         sync: false
       - key: OWNER_NAME
+        value: "Kervens"
         sync: false
       - key: BOT_NAME
+        value: "KING"
+        sync: false
+      - key: AUTHOR
+        value: "Kervens"
+        sync: false
+      - key: GITHUB
+        value: "kervens-king/KING"
         sync: false
       - key: RENDER_API_KEY
+        value: ${render.api.key}
+        sync: false
+      - key: RENDER_SERVICE_ID
+        value: ${render.service.id}
+        sync: false
+      - key: NODE_ENV
+        value: "production"
+        sync: false
+      - key: LANG_CODE
+        value: "fr"
         sync: false
